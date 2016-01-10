@@ -1,6 +1,7 @@
 package org.abimon.pharaoh;
 
 import org.abimon.omnis.lanterna.LanternaGeneral;
+import org.abimon.pharaoh.events.EventBus;
 
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
@@ -25,6 +26,10 @@ public class Pharaoh {
 	public static Window menu;
 
 	public static MultiWindowTextGUI gui;
+	
+	public static Egypt egypt;
+	
+	public static EventBus EVENT_BUS;
 	
 	public static final Runnable BACK_BUTTON = new Runnable(){
 		public void run(){
