@@ -1,5 +1,6 @@
-package org.abimon.pharaoh;
+package org.abimon.pharaoh.actions;
 
+import org.abimon.pharaoh.PharaohPlayer;
 import org.abimon.pharaoh.cards.Role;
 
 public interface Action {
@@ -15,4 +16,6 @@ public interface Action {
 	 * @return Name of the action
 	 */
 	public String getName();
+	
+	public void perform(PharaohPlayer player);
 }
