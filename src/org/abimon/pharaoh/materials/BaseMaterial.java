@@ -2,7 +2,7 @@ package org.abimon.pharaoh.materials;
 
 public class BaseMaterial implements Material{
 	
-	public static final BaseMaterial WOOD = new BaseMaterial("Wood", 1);
+	public static final BaseMaterial MUDBRICK = new BaseMaterial("Mud Brick", 1);
 	public static final BaseMaterial LIMESTONE = new BaseMaterial("Limestone", 1);
 	
 	public static final BaseMaterial BRONZE = new BaseMaterial("Bronze", 2);
