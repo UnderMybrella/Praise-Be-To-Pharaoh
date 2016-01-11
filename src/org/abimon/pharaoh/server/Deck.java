@@ -1,8 +1,9 @@
-package org.abimon.pharaoh;
+package org.abimon.pharaoh.server;
 
 import java.security.SecureRandom;
 import java.util.LinkedList;
 
+import org.abimon.pharaoh.Pharaoh;
 import org.abimon.pharaoh.events.PharaohEvent;
 
 public class Deck<T> {

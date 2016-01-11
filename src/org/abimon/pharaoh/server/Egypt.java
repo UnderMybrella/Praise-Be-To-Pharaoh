@@ -1,9 +1,10 @@
-package org.abimon.pharaoh;
+package org.abimon.pharaoh.server;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import org.abimon.omnis.util.General;
+import org.abimon.pharaoh.Pharaoh;
 import org.abimon.pharaoh.cards.Card;
 import org.abimon.pharaoh.cards.CardDB;
 import org.abimon.pharaoh.events.ConstructDeckEvent;

@@ -1,26 +1,23 @@
 package org.abimon.pharaoh.actions;
 
-import org.abimon.pharaoh.PharaohPlayer;
 import org.abimon.pharaoh.cards.Role;
+import org.abimon.pharaoh.server.PharaohPlayer;
 
 public class Think implements Action {
 
 	@Override
 	public Role getRoleRequired() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Think";
 	}
 
 	@Override
-	public void perform(PharaohPlayer player) {
-		// TODO Auto-generated method stub
-
+	public void perform(final PharaohPlayer player) {
+		
 	}
 
 }

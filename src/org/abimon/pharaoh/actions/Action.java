@@ -1,7 +1,7 @@
 package org.abimon.pharaoh.actions;
 
-import org.abimon.pharaoh.PharaohPlayer;
 import org.abimon.pharaoh.cards.Role;
+import org.abimon.pharaoh.server.PharaohPlayer;
 
 public interface Action {
 	
