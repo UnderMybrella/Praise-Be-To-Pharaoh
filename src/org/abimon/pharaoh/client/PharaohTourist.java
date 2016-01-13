@@ -13,6 +13,7 @@ public class PharaohTourist extends PharaohPlayer{
 	public void handleName(String name){}
 
 	public void setName(String name) {
+		this.write("name:" + name);
 		this.name = name;
 	}
 

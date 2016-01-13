@@ -114,12 +114,13 @@ public class Pharaoh {
 	public void hostGame(){
 		try{
 			final TextBox port = new TextBox(new TerminalSize(20, 1));
+			final TextBox name = new TextBox(new TerminalSize(20, 1));
 
-			gui.addWindowAndWait(LanternaGeneral.createWindow(new BasicWindow(), new GridLayout(2), new Panel(), new Label("Port: "), port,
+			gui.addWindowAndWait(LanternaGeneral.createWindow(new BasicWindow(), new GridLayout(2), new Panel(), new Label("Port: "), port, new Label("Name: "), name,
 					new Button("Host", new Runnable(){
 						public void run(){
 							try{
-								host(Integer.parseInt(port.getText().trim()));
+								host(name.getText(), Integer.parseInt(port.getText().trim()));
 							}
 							catch(Throwable th){
 								th.printStackTrace();
@@ -139,12 +140,12 @@ public class Pharaoh {
 	public static Button back;
 	public static Button start;
 
-	public void host(int port){
+	public void host(String name, int port){
 		try{
 			final ServerSocket server = new ServerSocket(port);
 
 			pharaohs = new LinkedList<PharaohPlayer>();
-
+			
 			lobbyWindow = new ScrollWindow();
 			panel = new ScrollPanel(10);
 			back = new Button("Back", BACK_BUTTON);
@@ -173,6 +174,11 @@ public class Pharaoh {
 
 			acceptanceThread.setDaemon(true);
 			acceptanceThread.start();
+			
+			tourist = new PharaohTourist(new Socket("localhost", port));
+			tourist.setName(name);
+			
+			Pharaoh.reloadNames();
 
 			gui.addWindowAndWait(lobbyWindow);
 
@@ -254,14 +260,13 @@ public class Pharaoh {
 
 	public void joinGame(){
 		final TextBox text = new TextBox(new TerminalSize(20, 1));
-		gui.addWindowAndWait(LanternaGeneral.createWindow(new BasicWindow(), new GridLayout(2), new Panel(), text,
+		gui.addWindowAndWait(LanternaGeneral.createWindow(new BasicWindow(), new GridLayout(2), new Panel(), new Label("IP: "), text,
 				new Button("Join", new Runnable(){
 					public void run(){
 						join(text.getText());
 					}
 				}),
-				new Button("Back", BACK_BUTTON),
-				new EmptySpace(new TerminalSize(0, 0)) 
+				new Button("Back", BACK_BUTTON)
 				));
 	}
 
@@ -278,15 +283,14 @@ public class Pharaoh {
 			BACK_BUTTON.run();
 
 			final TextBox text = new TextBox(new TerminalSize(20, 1));
-			gui.addWindowAndWait(LanternaGeneral.createWindow(new BasicWindow(), new GridLayout(2), new Panel(), text,
+			gui.addWindowAndWait(LanternaGeneral.createWindow(new BasicWindow(), new GridLayout(2), new Panel(), new Label("Name: "), text,
 					new Button("Join", new Runnable(){
 						public void run(){
 							BACK_BUTTON.run();
 							join(socket, text.getText());
 						}
 					}),
-					new Button("Back", BACK_BUTTON),
-					new EmptySpace(new TerminalSize(0, 0)) 
+					new Button("Back", BACK_BUTTON)
 					));
 		}
 		catch(Throwable th){
@@ -303,7 +307,6 @@ public class Pharaoh {
 		System.out.println("**TOURIST MODE**");
 
 		tourist = new PharaohTourist(server);
-		tourist.write("name:" + name);
 		tourist.setName(name);
 
 		final Window lobbyWindow = new ScrollWindow();
