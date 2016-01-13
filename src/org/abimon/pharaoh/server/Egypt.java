@@ -21,6 +21,8 @@ public class Egypt implements IEventHandler {
 	public int turnPlayer = -1;
 	
 	public boolean playGame = true;
+	
+	protected Egypt(){}
 
 	public Egypt(PharaohPlayer[] players){
 		Pharaoh.EVENT_BUS.register(this);
