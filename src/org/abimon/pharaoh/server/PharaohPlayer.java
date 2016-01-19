@@ -11,7 +11,7 @@ import org.abimon.pharaoh.Pharaoh;
 
 public class PharaohPlayer implements Runnable{
 
-	Socket client;
+	protected Socket client;
 	public String name = "";
 
 	protected PrintStream out;
@@ -48,13 +48,8 @@ public class PharaohPlayer implements Runnable{
 				if(in == null)
 					in = client.getInputStream();
 
-				if(out != null){
-					while(!outputBuffer.isEmpty())
-						out.println(outputBuffer.poll());
-					out.flush();
-				}
+				printBuffer();
 
-				//System.out.print("R");
 				Data read = new Data(in, false);
 				for(String line : read.getAsString().split("\n")){
 					line = line.trim();
@@ -62,9 +57,11 @@ public class PharaohPlayer implements Runnable{
 						continue;
 					if(line.startsWith("name:"))
 						handleName(line);
-					else{
-						unhandledInput.add(line);
-					}
+					else if(line.equalsIgnoreCase("DISCONNECT"))
+						client.close();
+					else
+						if(!handleInput(line))
+							unhandledInput.add(line);
 				}
 			}
 			catch(IOException exception){
@@ -78,10 +75,22 @@ public class PharaohPlayer implements Runnable{
 		Pharaoh.disconnect(this);
 	}
 
+	public boolean handleInput(String line) {
+		return false;
+	}
+
 	public void handleName(String line){
 		name = line.split(":", 2)[1];
 		internalThread.setName(name + " of Egypt");
 		Pharaoh.reloadNames();
+	}
+
+	public void printBuffer(){
+		if(out != null){
+			while(!outputBuffer.isEmpty())
+				out.println(outputBuffer.poll());
+			out.flush();
+		}
 	}
 
 	public void write(Object... objs){

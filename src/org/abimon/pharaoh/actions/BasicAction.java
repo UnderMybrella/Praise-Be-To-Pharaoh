@@ -5,6 +5,8 @@ import org.abimon.pharaoh.server.PharaohPlayer;
 
 public class BasicAction implements Action{
 
+	
+	
 	Role role;
 	
 	public BasicAction(Role role){

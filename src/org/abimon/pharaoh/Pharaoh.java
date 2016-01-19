@@ -1,5 +1,6 @@
 package org.abimon.pharaoh;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -12,6 +13,7 @@ import org.abimon.omnis.lanterna.LanternaGeneral;
 import org.abimon.omnis.lanterna.ScrollPanel;
 import org.abimon.omnis.lanterna.ScrollWindow;
 import org.abimon.omnis.reflect.ReflectionHelper;
+import org.abimon.pharaoh.cards.CardList;
 import org.abimon.pharaoh.client.PharaohTourist;
 import org.abimon.pharaoh.events.EventBus;
 import org.abimon.pharaoh.server.Egypt;
@@ -46,7 +48,7 @@ public class Pharaoh {
 
 	public static Egypt egypt;
 
-	public static EventBus EVENT_BUS;
+	public static EventBus EVENT_BUS = new EventBus();
 
 	public static final Runnable BACK_BUTTON = new Runnable(){
 		public void run(){
@@ -55,6 +57,7 @@ public class Pharaoh {
 	};
 
 	public static void main(String[] args) {
+		new CardList();
 		new Pharaoh();
 	}
 
@@ -117,6 +120,7 @@ public class Pharaoh {
 			final TextBox name = new TextBox(new TerminalSize(20, 1));
 
 			gui.addWindowAndWait(LanternaGeneral.createWindow(new BasicWindow(), new GridLayout(2), new Panel(), new Label("Port: "), port, new Label("Name: "), name,
+					new Button("Back", BACK_BUTTON),
 					new Button("Host", new Runnable(){
 						public void run(){
 							try{
@@ -126,8 +130,7 @@ public class Pharaoh {
 								th.printStackTrace();
 							}
 						}
-					}),
-					new Button("Back", BACK_BUTTON)));
+					})));
 		}
 		catch(Throwable th){
 			th.printStackTrace();
@@ -145,11 +148,25 @@ public class Pharaoh {
 			final ServerSocket server = new ServerSocket(port);
 
 			pharaohs = new LinkedList<PharaohPlayer>();
-			
+
 			lobbyWindow = new ScrollWindow();
 			panel = new ScrollPanel(10);
-			back = new Button("Back", BACK_BUTTON);
-			start = new Button("Start", BACK_BUTTON);
+			back = new Button("Back", new Runnable(){
+				public void run(){
+					try{
+						for(PharaohPlayer player : pharaohs)
+							player.write("close_server");
+						server.close();
+					}
+					catch(Throwable th){}
+					BACK_BUTTON.run();
+				}
+			});
+			start = new Button("Start", new Runnable(){
+				public void run(){
+					Pharaoh.egypt = new Egypt(pharaohs.toArray(new PharaohPlayer[0]));
+				}
+			});
 
 			panel.addComponent(back);
 			panel.addComponent(start);
@@ -174,15 +191,13 @@ public class Pharaoh {
 
 			acceptanceThread.setDaemon(true);
 			acceptanceThread.start();
-			
+
 			tourist = new PharaohTourist(new Socket("localhost", port));
 			tourist.setName(name);
-			
+
 			Pharaoh.reloadNames();
 
-			gui.addWindowAndWait(lobbyWindow);
-
-			server.close();
+			gui.addWindow(lobbyWindow);
 		}
 		catch(Throwable th){
 			th.printStackTrace();
@@ -191,7 +206,7 @@ public class Pharaoh {
 
 	public static void reloadNames(){
 		boolean proceed = false;
-		
+
 		for(Component comp : panel.getChildren())
 			if(comp instanceof Label){
 				boolean contains = false;
@@ -261,12 +276,12 @@ public class Pharaoh {
 	public void joinGame(){
 		final TextBox text = new TextBox(new TerminalSize(20, 1));
 		gui.addWindowAndWait(LanternaGeneral.createWindow(new BasicWindow(), new GridLayout(2), new Panel(), new Label("IP: "), text,
+				new Button("Back", BACK_BUTTON),
 				new Button("Join", new Runnable(){
 					public void run(){
 						join(text.getText());
 					}
-				}),
-				new Button("Back", BACK_BUTTON)
+				})
 				));
 	}
 
@@ -284,13 +299,13 @@ public class Pharaoh {
 
 			final TextBox text = new TextBox(new TerminalSize(20, 1));
 			gui.addWindowAndWait(LanternaGeneral.createWindow(new BasicWindow(), new GridLayout(2), new Panel(), new Label("Name: "), text,
+					new Button("Back", BACK_BUTTON),
 					new Button("Join", new Runnable(){
 						public void run(){
 							BACK_BUTTON.run();
 							join(socket, text.getText());
 						}
-					}),
-					new Button("Back", BACK_BUTTON)
+					})
 					));
 		}
 		catch(Throwable th){
@@ -299,8 +314,6 @@ public class Pharaoh {
 			gui.addWindowAndWait(LanternaGeneral.createWindow(new Label("Connection Failed"), new Button("Back", BACK_BUTTON)));
 		}
 	}
-
-	public static boolean joined = false;
 
 	public void join(Socket server, String name){
 
@@ -311,7 +324,12 @@ public class Pharaoh {
 
 		final Window lobbyWindow = new ScrollWindow();
 		final Panel panel = new ScrollPanel(10);
-		final Button back = new Button("Back", BACK_BUTTON);
+		final Button back = new Button("Back", new Runnable(){
+			public void run(){
+				tourist.closeClient();
+				BACK_BUTTON.run();
+			}
+		});
 		panel.addComponent(back);
 		lobbyWindow.setComponent(panel);
 
@@ -319,7 +337,7 @@ public class Pharaoh {
 
 		Thread serverRead = new Thread(){
 			public void run(){
-				while(!joined){
+				while(Pharaoh.egypt == null){
 					try{
 						try{
 							if(tourist.unhandledInput.isEmpty())
@@ -339,8 +357,6 @@ public class Pharaoh {
 						}
 						catch(java.util.NoSuchElementException ex){}
 
-						System.out.println(pharaohs);
-						
 						for(Component comp : panel.getChildren())
 							if(comp instanceof Label){
 								boolean contains = false;
@@ -353,7 +369,7 @@ public class Pharaoh {
 								if(!contains)
 									panel.removeComponent(comp);
 							}
-
+						
 						boolean proceed = false;
 						for(String player : pharaohs)
 							if(!player.equals("")){
@@ -369,7 +385,7 @@ public class Pharaoh {
 									break;
 								}
 							}
-
+						
 						if(!proceed)
 							continue;
 
@@ -395,11 +411,15 @@ public class Pharaoh {
 						panel.addComponent(back);
 
 						if(backSelected)
-							lobbyWindow.setFocusedInteractable(back);
+							lobbyWindow.setFocusedInteractable(back);	
 					}
 					catch(Throwable th){
 						th.printStackTrace();
 					}
+				}
+
+				for(Window window : gui.getWindows()){
+					window.close();
 				}
 			}
 		};
@@ -408,6 +428,31 @@ public class Pharaoh {
 		serverRead.start();
 
 		gui.addWindow(lobbyWindow);
+		
+		redraw();
+
+		while(true){
+			try{
+				redraw();
+				Thread.sleep(100);
+				if(egypt != null)
+					break;
+			}
+			catch(Throwable th){}
+		}
+		
+		for(Window window : gui.getWindows())
+			gui.removeWindow(window);
+		gui.addWindowAndWait(tourist.mainMenu);
+	}
+	
+	public static void redraw(){
+		try{
+			gui.updateScreen();
+		}
+		catch(IOException io){
+			io.printStackTrace();
+		}
 	}
 
 	public void about() {
@@ -426,6 +471,8 @@ public class Pharaoh {
 
 	public static void disconnect(PharaohPlayer pharaohPlayer) {
 		if(egypt == null){
+			if(Pharaoh.pharaohs == null)
+				return;
 			Pharaoh.pharaohs.remove(pharaohPlayer);
 			for(PharaohPlayer player : pharaohs)
 				player.write("left:" + pharaohPlayer.getName());

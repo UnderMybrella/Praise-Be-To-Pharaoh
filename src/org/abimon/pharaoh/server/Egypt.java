@@ -6,7 +6,7 @@ import java.util.List;
 import org.abimon.omnis.util.General;
 import org.abimon.pharaoh.Pharaoh;
 import org.abimon.pharaoh.cards.Card;
-import org.abimon.pharaoh.cards.CardDB;
+import org.abimon.pharaoh.cards.Database;
 import org.abimon.pharaoh.events.ConstructDeckEvent;
 import org.abimon.pharaoh.events.IEventHandler;
 import org.abimon.pharaoh.events.PharaohEvent;
@@ -25,6 +25,10 @@ public class Egypt implements IEventHandler {
 	protected Egypt(){}
 
 	public Egypt(PharaohPlayer[] players){
+		
+		for(PharaohPlayer player : players)
+			player.write("start_game");
+		
 		Pharaoh.EVENT_BUS.register(this);
 		constructDeck();
 
@@ -32,6 +36,8 @@ public class Egypt implements IEventHandler {
 
 		for(int i = 0; i < players.length; i++){
 			Card card = deck.draw();
+			if(card == null)
+				break;
 			String cardName = card.getName();
 			if(lowest.equals("") || turnPlayer == -1){
 				lowest = cardName;
@@ -63,7 +69,7 @@ public class Egypt implements IEventHandler {
 	}
 
 	private void constructDeck(){
-		for(Card card : CardDB.getCards())
+		for(Card card : Database.getCards())
 			deck.add(card);
 		deck.shuffle();
 
